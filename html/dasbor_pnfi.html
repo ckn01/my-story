@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desain Database PNFI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#f5f3ef;--fg:#1a1a1a;--muted:#7a7568;--border:#d8d4cb;--accent:#c2550a;--accent-light:rgba(194,85,10,.08);--auth:#1a6fc4;--auth-bg:#e8f0fa;--ref:#0d7c5f;--ref-bg:#e6f5ef;--dbo:#b85c00;--dbo-bg:#fdf2e3;--log:#7c3aed;--log-bg:#f0ebfa;--trx:#c41e1e;--trx-bg:#fceaea;--rekap:#0e7490;--rekap-bg:#e6f5fa;--card:#fff;--shadow:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shadow-h:0 2px 8px rgba(0,0,0,.08),0 8px 28px rgba(0,0,0,.06);--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--fg);overflow:hidden;height:100vh;width:100vw;user-select:none}
+.pres{width:100vw;height:100vh;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transform:translateX(60px);transition:opacity .45s,transform .45s;pointer-events:none;padding:44px 60px;overflow-y:auto}
+.slide.on{opacity:1;transform:translateX(0);pointer-events:auto}
+.slide.off{opacity:0;transform:translateX(-60px)}
+.slide::-webkit-scrollbar{width:5px}.slide::-webkit-scrollbar-thumb{background:var(--border);border-radius:9px}
+.pbar{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:100;transition:width .4s}
+.nnav{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;z-index:100;background:var(--card);box-shadow:var(--shadow);padding:10px 24px;border-radius:40px;border:1px solid var(--border)}
+.nb{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.nb:hover{background:var(--accent);color:#fff;border-color:var(--accent)}.nb:disabled{opacity:.3;cursor:default;background:var(--card);color:var(--muted);border-color:var(--border)}
+.sc{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);min-width:66px;text-align:center}
+.gn{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:100}
+.gd{width:10px;height:10px;border-radius:50%;cursor:pointer;transition:all .3s;border:2px solid transparent;opacity:.5;position:relative}
+.gd:hover{transform:scale(1.5);opacity:.8}.gd.on{border-color:var(--fg);transform:scale(1.4);opacity:1}
+.gd .tt{position:absolute;right:20px;top:50%;transform:translateY(-50%);background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);padding:4px 10px;border-radius:6px;font-size:11px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;color:var(--fg)}
+.gd:hover .tt{opacity:1}
+.cc{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative}
+.cb{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--accent);background:var(--accent-light);border:1px solid rgba(194,85,10,.18);padding:6px 20px;border-radius:20px;margin-bottom:32px}
+.ct{font-size:52px;font-weight:700;line-height:1.12;margin-bottom:14px}.ct b{background:linear-gradient(135deg,var(--accent),#e07830);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
+.cs{font-size:17px;color:var(--muted);font-weight:300;margin-bottom:36px}
+.cm{display:flex;gap:20px;font-size:12px;color:var(--muted);flex-wrap:wrap;justify-content:center}.cm span i{margin-right:5px}
+.cdeco{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(194,85,10,.04) 0%,transparent 65%);pointer-events:none}
+.og{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:18px}
+.sk{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 14px;position:relative;overflow:hidden;cursor:pointer;transition:all .25s;box-shadow:var(--shadow)}
+.sk:hover{transform:translateY(-3px);box-shadow:var(--shadow-h)}
+.sk .si{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:10px}
+.sk .sn{font-weight:600;font-size:13px;margin-bottom:3px}.sk .sd{font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4}
+.sk .sv{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700}.sk .sv small{font-size:10px;font-weight:400;color:var(--muted)}
+.sk::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.sr{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px}
+.st{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--shadow)}
+.stv{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--accent)}.stl{font-size:11px;color:var(--muted);margin-top:2px}
+.gh{display:flex;flex-direction:column;justify-content:center;flex:1}
+.ggb{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+.ggt{font-size:36px;font-weight:700;margin-bottom:10px}
+.ggd{font-size:14px;color:var(--muted);max-width:640px;line-height:1.6;margin-bottom:16px}
+.ggn{display:inline-flex;align-items:center;gap:8px;font-size:12px;padding:7px 14px;border-radius:8px;margin-bottom:16px}
+.ggn i{font-size:13px}
+.ggsub{font-size:13px;font-weight:600;margin-bottom:8px;margin-top:4px}
+.ggtc{display:flex;flex-wrap:wrap;gap:7px}
+.tc{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 12px;border-radius:8px;border:1px solid}
+.tdh{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.tdd{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.tdn{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:600}
+.tdc{font-size:12px;color:var(--muted);margin-left:auto;font-family:'JetBrains Mono',monospace}
+.tds{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:12px;padding-left:24px}
+.ab{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--accent-light);color:var(--accent);letter-spacing:.5px;margin-left:5px}
+.af{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--auth-bg);color:var(--auth);letter-spacing:.5px;margin-left:4px}
+.agbadge{font-size:10px;color:#fff;padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:600}
+.ctb{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.ctb thead th{text-align:left;padding:8px 14px;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:2px solid var(--border);position:sticky;top:0;background:var(--card);z-index:2}
+.ctb tbody td{padding:6px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.ctb tbody tr{transition:background .15s}.ctb tbody tr:hover{background:var(--accent-light)}
+.cn{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--fg);font-size:12px}
+.ct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.rg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.rc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;box-shadow:var(--shadow)}
+.rc .rn{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--accent);margin-bottom:5px;font-size:11px}
+.rc .rb{color:var(--muted);line-height:1.5;font-family:'JetBrains Mono',monospace;font-size:11px}
+.po{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35;background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,.04) 1px,transparent 0);background-size:28px 28px}
+.sh{position:fixed;bottom:80px;right:16px;font-size:10px;color:var(--muted);text-align:right;z-index:100;line-height:1.8;font-family:'JetBrains Mono',monospace}
+.sh kbd{background:var(--card);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:10px}
+@media(max-width:1024px){.slide{padding:24px 28px}.ct{font-size:32px}.og{grid-template-columns:repeat(3,1fr)}.sr{grid-template-columns:repeat(3,1fr)}.rg{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="po"></div>
+<canvas id="cv" style="position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.2"></canvas>
+<div class="pbar" id="pb"></div>
+<div class="pres" id="pr"></div>
+<nav class="nnav">
+<button class="nb" id="bf" title="Pertama"><i class="fas fa-angles-left"></i></button>
+<button class="nb" id="bp" title="Sebelumnya"><i class="fas fa-chevron-left"></i></button>
+<span class="sc" id="sct">1/1</span>
+<button class="nb" id="bn" title="Berikutnya"><i class="fas fa-chevron-right"></i></button>
+<button class="nb" id="bl" title="Terakhir"><i class="fas fa-angles-right"></i></button>
+</nav>
+<div class="gn" id="gnv"></div>
+<div class="sh"><kbd>&larr;</kbd><kbd>&rarr;</kbd> Navigasi<br><kbd>Home</kbd><kbd>End</kbd></div>
+
+<script>
+// =============================================
+// DATA DEFINITIONS
+// =============================================
+var T = {}; // semua tabel per skema
+
+T.auth_pengguna = {
+  pk:'id', schema:'auth', label:'auth.pengguna',
+  fks:{sekolah_id:'dbo.sekolah',kode_wilayah:'ref.wilayah'},
+  c:[['id','uuid',1],['username','varchar(100)'],['nama','varchar(150)'],['email','varchar(150)'],['password','varchar(512)'],['sumber_akun','varchar(20)'],['dapodik_user_id','varchar(100)'],['sekolah_id','uuid',0,1],['kode_wilayah','char(8)',0,1],['is_aktif','boolean'],['last_login_at','timestamp'],['created_at','timestamp'],['updated_at','timestamp'],['deleted_at','timestamp']]
+};
+T.auth_pengguna_peran = {
+  pk:'id', schema:'auth', label:'auth.pengguna_peran',
+  fks:{pengguna_id:'auth.pengguna',peran_id:'auth.peran'},
+  c:[['id','uuid',1],['pengguna_id','uuid',0,1],['peran_id','integer',0,1],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.auth_peran = {
+  pk:'id', schema:'auth', label:'auth.peran',
+  fks:{},
+  c:[['id','integer',1],['kode','varchar(30)'],['nama','varchar(100)'],['deskripsi','text'],['level_wilayah','smallint'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.auth_sso_token = {
+  pk:'id', schema:'auth', label:'auth.sso_token',
+  fks:{pengguna_id:'auth.pengguna'},
+  c:[['id','uuid',1],['pengguna_id','uuid',0,1],['access_token','text'],['refresh_token','text'],['token_type','varchar(20)'],['scope','text'],['expires_at','timestamp'],['revoked_at','timestamp'],['ip_address','varchar(45)'],['user_agent','text'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+
+T.ref_wilayah = {
+  pk:'kode_wilayah', schema:'ref', label:'ref.wilayah',
+  fks:{mst_kode_wilayah:'ref.wilayah'},
+  c:[['kode_wilayah','char(8)',1],['nama','varchar(60)'],['id_level_wilayah','smallint'],['mst_kode_wilayah','char(8)',0,1],['negara_id','char(2)'],['asal_wilayah','char(8)'],['kode_bps','char(7)'],['kode_dagri','char(10)'],['kode_keu','char(10)'],['id_prov','char(8)'],['id_kabkota','char(8)'],['id_kec','char(8)'],['a_desa','numeric(1,0)'],['a_kelurahan','numeric(1,0)'],['a_35','numeric(1,0)'],['a_urban','numeric(1,0)'],['kategori_desa_id','numeric(2,0)'],['create_date','timestamp'],['last_update','timestamp'],['expired_date','timestamp'],['last_sync','timestamp'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.ref_bentuk_pendidikan = {
+  pk:'id', schema:'ref', label:'ref.bentuk_pendidikan', fks:{},
+  c:[['id','integer',1],['kode','varchar(10)'],['nama','varchar(100)'],['is_pnfi','boolean'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.ref_jenis_program = {
+  pk:'id', schema:'ref', label:'ref.jenis_program', fks:{},
+  c:[['id','integer',1],['kode','varchar(20)'],['nama','varchar(100)'],['kelompok','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.ref_semester = {
+  pk:'semester_id', schema:'ref', label:'ref.semester',
+  fks:{tahun_ajaran_id:'ref.tahun_ajaran'},
+  c:[['semester_id','char(5)',1],['tahun_ajaran_id','numeric(4,0)',0,1],['nama','varchar(20)'],['semester','numeric(1,0)'],['periode_aktif','numeric(1,0)'],['tanggal_mulai','date'],['tanggal_selesai','date'],['expired_date','timestamp'],['create_date','timestamp'],['last_update','timestamp']]
+};
+T.ref_tahun_ajaran = {
+  pk:'tahun_ajaran_id', schema:'ref', label:'ref.tahun_ajaran', fks:{},
+  c:[['tahun_ajaran_id','numeric(4,0)',1],['nama','varchar(10)'],['periode_aktif','numeric(1,0)'],['tanggal_mulai','date'],['tanggal_selesai','date'],['create_date','timestamp'],['last_update','timestamp'],['expired_date','timestamp'],['last_sync','timestamp']]
+};
+
+T.dbo_sekolah = {
+  pk:'sekolah_id', schema:'dbo', label:'dbo.sekolah',
+  fks:{bentuk_pendidikan_id:'ref.bentuk_pendidikan',kode_desa_kelurahan:'ref.wilayah',kode_kecamatan:'ref.wilayah',kode_kabupaten:'ref.wilayah',kode_provinsi:'ref.wilayah',semester_id:'ref.semester'},
+  c:[['sekolah_id','uuid',1],['semester','char(5)'],['semester_id','char(5)',0,1],['nama','varchar(100)'],['nama_nomenklatur','varchar(100)'],['nss','char(12)'],['npsn','char(8)'],['bentuk_pendidikan','varchar(50)'],['bentuk_pendidikan_id','integer',0,1],['jenjang','char(6)'],['naungan','varchar(30)'],['alamat_jalan','varchar(80)'],['rt','numeric(2,0)'],['rw','numeric(2,0)'],['nama_dusun','varchar(60)'],['kode_desa_kelurahan','char(8)',0,1],['desa_kelurahan','varchar(60)'],['kode_kecamatan','char(8)',0,1],['kecamatan','varchar(60)'],['kode_kabupaten','char(8)',0,1],['kabupaten','varchar(60)'],['kode_provinsi','char(8)',0,1],['provinsi','varchar(60)'],['provinsi_alias','varchar(16)'],['kode_pos','char(5)'],['lintang','numeric(18,12)'],['bujur','numeric(18,12)'],['nomor_telepon','varchar(20)'],['nomor_fax','varchar(20)'],['email','varchar(60)'],['website','varchar(100)'],['kebutuhan_khusus','varchar(40)'],['status_sekolah','varchar(10)'],['sk_pendirian_sekolah','varchar(80)'],['tanggal_sk_pendirian','date'],['status_kepemilikan','varchar(20)'],['yayasan','varchar(100)'],['sk_izin_operasional','varchar(80)'],['tanggal_sk_izin_operasional','date'],['no_rekening','varchar(20)'],['nama_bank','varchar(20)'],['cabang_kcp_unit','varchar(60)'],['rekening_atas_nama','varchar(50)'],['mbs','varchar(5)'],['luas_tanah_milik','bigint'],['luas_tanah_bukan_milik','bigint'],['kode_registrasi','bigint'],['npwp','varchar(25)'],['nm_wp','varchar(100)'],['keaktifan','varchar(5)'],['daya_listrik','numeric(6,0)'],['kontinuitas_listrik','varchar(5)'],['jarak_listrik','numeric(10,0)'],['wilayah_terpencil','varchar(5)'],['wilayah_perbatasan','varchar(5)'],['wilayah_transmigrasi','varchar(5)'],['wilayah_adat_terpencil','varchar(5)'],['wilayah_bencana_alam','varchar(5)'],['wilayah_bencana_sosial','varchar(5)'],['partisipasi_bos','varchar(5)'],['waktu_penyelenggaraan','varchar(20)'],['sumber_listrik','varchar(50)'],['sertifikasi_iso','varchar(20)'],['akses_internet','varchar(50)'],['akses_internet_2','varchar(50)'],['akreditasi','varchar(20)'],['akreditasi_sp_tmt','date'],['akreditasi_sp_sk','varchar(80)'],['daerah_khusus_kepmen_580_2020','integer'],['daerah_khusus_kepmen_160','integer'],['flag','varchar(3)'],['angkatan_pk','integer'],['angkatan_psp','integer'],['angkatan_ikm','integer'],['internet_jenis_layanan','varchar(30)'],['internet_jenis_koneksi','varchar(30)'],['internet_provider','varchar(30)'],['internet_bandwidth','numeric(10,2)'],['internet_bandwidth_up','numeric(10,2)'],['internet_bandwidth_down','numeric(10,2)'],['internet_latency','smallint'],['listrik_sumber','varchar(50)'],['listrik_daya','numeric(6,0)'],['listrik_kontinuitas','varchar(50)'],['listrik_id_pelanggan','varchar(12)'],['listrik_nomor_meter','varchar(20)'],['listrik_jenis_meter','varchar(15)'],['listrik_status_sambungan','varchar(20)'],['listrik_utama','char(5)'],['last_sync','timestamp'],['created_at','timestamp'],['updated_at','timestamp'],['deleted_at','timestamp']]
+};
+T.dbo_ptk = {
+  pk:'ptk_id', schema:'dbo', label:'dbo.ptk',
+  fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'},
+  c:[['ptk_id','uuid',1],['semester_id','char(5)',0,1],['sekolah_id','uuid',0,1],['ptk_terdaftar_id','uuid'],['nama','varchar(100)'],['nip','varchar(18)'],['jenis_kelamin','char(1)'],['tempat_lahir','varchar(32)'],['tanggal_lahir','date'],['nik','varchar(16)'],['no_kk','char(16)'],['niy_nigk','varchar(30)'],['nuptk','varchar(16)'],['nuks','varchar(22)'],['status_kepegawaian','varchar(30)'],['jenis_ptk','varchar(30)'],['pengawas_bidang_studi','varchar(40)'],['agama','varchar(25)'],['kewarganegaraan','varchar(50)'],['alamat_jalan','varchar(80)'],['rt','numeric(2,0)'],['rw','numeric(2,0)'],['nama_dusun','varchar(60)'],['kode_desa_kelurahan','char(8)'],['desa_kelurahan','varchar(60)'],['kode_kecamatan','char(8)'],['kecamatan','varchar(60)'],['kode_kabupaten','char(8)'],['kabupaten','varchar(60)'],['kode_provinsi','char(8)'],['provinsi','varchar(60)'],['kode_pos','char(5)'],['lintang','numeric(18,12)'],['bujur','numeric(18,12)'],['no_telepon_rumah','varchar(20)'],['no_hp','varchar(20)'],['email','varchar(60)'],['status_keaktifan','varchar(30)'],['sk_cpns','varchar(80)'],['tgl_cpns','date'],['sk_pengangkatan','varchar(80)'],['tmt_pengangkatan','date'],['lembaga_pengangkat','varchar(100)'],['pangkat_golongan','varchar(20)'],['sumber_gaji','varchar(40)'],['nama_ibu_kandung','varchar(100)'],['status_perkawinan','varchar(20)'],['nama_suami_istri','varchar(100)'],['nip_suami_istri','char(18)'],['pekerjaan_suami_istri','varchar(25)'],['tmt_pns','date'],['sudah_lisensi_kepala_sekolah','varchar(5)'],['jumlah_sekolah_binaan','integer'],['pernah_diklat_kepengawasan','varchar(5)'],['nm_wp','varchar(100)'],['status_data','integer'],['karpeg','varchar(10)'],['mampu_handle_kk','varchar(5)'],['keahlian_braille','varchar(5)'],['keahlian_bhs_isyarat','varchar(5)'],['npwp','varchar(25)'],['bank','varchar(30)'],['rekening_bank','varchar(20)'],['rekening_atas_nama','varchar(50)'],['tahun_ajaran','numeric(4,0)'],['nomor_surat_tugas','varchar(80)'],['tanggal_surat_tugas','date'],['tmt_tugas','date'],['ptk_induk','varchar(5)'],['jenis_keluar','varchar(40)'],['tgl_ptk_keluar','date'],['kompetensi_bidang_studi','varchar(40)'],['riwayat_kepangkatan_pangkat_golongan','varchar(20)'],['riwayat_kepangkatan_nomor_sk','varchar(80)'],['riwayat_kepangkatan_tanggal_sk','date'],['riwayat_kepangkatan_tmt_pangkat','date'],['riwayat_kepangkatan_masa_kerja_gol_tahun','numeric(2,0)'],['riwayat_kepangkatan_masa_kerja_gol_bulan','numeric(2,0)'],['riwayat_sertifikasi_bidang_studi','varchar(40)'],['riwayat_sertifikasi_jenis_sertifikasi','varchar(30)'],['riwayat_sertifikasi_tahun_sertifikasi','numeric(4,0)'],['riwayat_sertifikasi_nomor_sertifikat','varchar(80)'],['riwayat_sertifikasi_nrg','varchar(80)'],['riwayat_sertifikasi_nomor_peserta','varchar(80)'],['riwayat_pendidikan_formal_bidang_studi','varchar(40)'],['riwayat_pendidikan_formal_jenjang_pendidikan','varchar(25)'],['riwayat_pendidikan_formal_gelar_akademik','varchar(40)'],['riwayat_pendidikan_formal_satuan_pendidikan_formal','varchar(100)'],['riwayat_pendidikan_formal_fakultas','varchar(200)'],['riwayat_pendidikan_formal_kependidikan','varchar(5)'],['riwayat_pendidikan_formal_tahun_masuk','numeric(4,0)'],['riwayat_pendidikan_formal_tahun_lulus','numeric(4,0)'],['riwayat_pendidikan_formal_nim','varchar(50)'],['riwayat_pendidikan_formal_ipk','numeric(5,2)'],['jumlah_anak','integer'],['tugas_tambahan_jabatan_ptk','varchar(50)'],['tugas_tambahan_sekolah','varchar(100)'],['tugas_tambahan_jumlah_jam','numeric(2,0)'],['tugas_tambahan_nomor_sk','varchar(80)'],['tugas_tambahan_tmt_tambahan','date'],['tugas_tambahan_tst_tambahan','date'],['penerima_tpg','integer'],['penerima_tkg','integer'],['penerima_tamsil','integer'],['guru_penggerak','integer'],['jabatan_ptk','varchar(100)'],['last_sync','timestamp'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.dbo_peserta_didik = {
+  pk:'peserta_didik_id', schema:'dbo', label:'dbo.peserta_didik',
+  fks:{sekolah_id:'dbo.sekolah',rombongan_belajar_id:'dbo.rombongan_belajar',semester_id:'ref.semester',kode_wilayah:'ref.wilayah'},
+  c:[['anggota_rombel_id','uuid'],['peserta_didik_id','uuid',1],['semester_id','char(5)',0,1],['sekolah_id','uuid',0,1],['registrasi_id','uuid'],['rombongan_belajar_id','uuid',0,1],['nama','varchar(100)'],['jenis_kelamin','char(1)'],['nisn','char(10)'],['nik','char(16)'],['no_kk','char(16)'],['tempat_lahir','varchar(32)'],['tanggal_lahir','date'],['agama','varchar(25)'],['kewarganegaraan','varchar(45)'],['kebutuhan_khusus','varchar(40)'],['alamat_jalan','varchar(80)'],['rt','numeric(2,0)'],['rw','numeric(2,0)'],['nama_dusun','varchar(60)'],['kode_wilayah','char(8)',0,1],['desa_kelurahan','varchar(60)'],['kecamatan','varchar(60)'],['kabupaten','varchar(100)'],['provinsi','varchar(100)'],['kode_pos','char(5)'],['lintang','numeric(18,12)'],['bujur','numeric(18,12)'],['jenis_tinggal','varchar(30)'],['alat_transportasi','varchar(40)'],['nik_ayah','char(16)'],['nik_ibu','char(16)'],['anak_keberapa','numeric(2,0)'],['nomor_telepon_rumah','varchar(20)'],['nomor_telepon_seluler','varchar(20)'],['email','varchar(60)'],['layak_pip','varchar(5)'],['alasan_layak_pip','varchar(100)'],['penerima_kip','varchar(5)'],['no_kip','varchar(60)'],['nm_kip','varchar(200)'],['reg_akta_lahir','varchar(80)'],['nama_ayah','varchar(100)'],['tahun_lahir_ayah','numeric(4,0)'],['jenjang_pendidikan_ayah','varchar(25)'],['pekerjaan_ayah','varchar(25)'],['penghasilan_ayah','varchar(40)'],['kebutuhan_khusus_ayah','varchar(40)'],['nama_ibu_kandung','varchar(100)'],['tahun_lahir_ibu','numeric(4,0)'],['jenjang_pendidikan_ibu','varchar(25)'],['pekerjaan_ibu','varchar(25)'],['penghasilan_ibu','varchar(40)'],['kebutuhan_khusus_ibu','varchar(40)'],['nama_wali','varchar(30)'],['pekerjaan_wali','varchar(25)'],['penghasilan_wali','varchar(40)'],['bank','varchar(30)'],['nama_kcp','varchar(100)'],['rekening_bank','varchar(20)'],['rekening_atas_nama','varchar(100)'],['jenis_pendaftaran_sekolah','varchar(50)'],['nipd','varchar(18)'],['tanggal_masuk_sekolah','date'],['no_skhun','char(22)'],['no_peserta_ujian','char(22)'],['no_seri_ijazah','varchar(80)'],['sekolah_asal','varchar(100)'],['jenis_pendaftaran_rombel','varchar(50)'],['tingkat_pendidikan_id','numeric(2,0)'],['tingkat_pendidikan','varchar(20)'],['nama_jurusan','varchar(100)'],['jenis_rombel','varchar(80)'],['nama_rombel','varchar(30)'],['moving_class','varchar(5)'],['tinggi_badan','numeric(3,0)'],['berat_badan','numeric(3,0)'],['lingkar_kepala','numeric(3,0)'],['jarak_rumah_ke_sekolah','numeric(1,0)'],['jarak_rumah_ke_sekolah_km','numeric(3,0)'],['waktu_tempuh_ke_sekolah','numeric(1,0)'],['menit_tempuh_ke_sekolah','numeric(3,0)'],['jumlah_saudara_kandung','numeric(2,0)'],['jenis_keluar','varchar(40)'],['tanggal_keluar','date'],['usia','numeric(18,0)'],['jenis_keluar_id','char(1)'],['agama_id','smallint'],['kategori_miskin','smallint'],['pd_create_date','timestamp'],['pd_last_update','timestamp'],['rpd_create_date','timestamp'],['rpd_last_update','timestamp'],['ar_create_date','timestamp'],['ar_last_update','timestamp'],['pdl_create_date','timestamp'],['pdl_last_update','timestamp'],['last_sync','timestamp'],['created_at','timestamp'],['updated_at','timestamp'],['deleted_at','timestamp']]
+};
+T.dbo_rombongan_belajar = {
+  pk:'rombongan_belajar_id', schema:'dbo', label:'dbo.rombongan_belajar',
+  fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'},
+  c:[['rombongan_belajar_id','uuid',1],['semester_id','char(5)',0,1],['jurusan_sp_id','uuid'],['sekolah_id','uuid',0,1],['id_ruang','uuid'],['nama_ruang','varchar(100)'],['tingkat_pendidikan_id','numeric(2,0)'],['tingkat_pendidikan','varchar(20)'],['jurusan_id','varchar(25)'],['jurusan','varchar(100)'],['kurikulum','varchar(120)'],['nama','varchar(30)'],['ptk_id','uuid'],['nama_ptk','varchar(100)'],['moving_class','varchar(5)'],['jenis_rombel','varchar(80)'],['sks','numeric(2,0)'],['kebutuhan_khusus','varchar(40)'],['jumlah_pembelajaran','integer'],['jumlah_anggota_rombel','integer'],['jsp_jurusan_sp_id','uuid'],['jsp_create_date','timestamp'],['jsp_last_update','timestamp'],['jsp_jurusan_id','varchar(25)'],['jsp_bidang_id','varchar(25)'],['jsp_nama_bidang','varchar(100)'],['jsp_program_id','varchar(25)'],['jsp_nama_program','varchar(100)'],['jsp_kompetensi_id','varchar(25)'],['jsp_nama_kompetensi','varchar(100)'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.dbo_pembelajaran = {
+  pk:'pembelajaran_id', schema:'dbo', label:'dbo.pembelajaran',
+  fks:{sekolah_id:'dbo.sekolah',rombongan_belajar_id:'dbo.rombongan_belajar',semester_id:'ref.semester'},
+  c:[['pembelajaran_id','uuid',1],['semester_id','char(5)',0,1],['sekolah_id','uuid',0,1],['rombongan_belajar_id','uuid',0,1],['tingkat_pendidikan_id','integer'],['ptk_terdaftar_id','uuid'],['ptk_id','uuid'],['induk_pembelajaran_id','uuid'],['nama_ptk','varchar(100)'],['sk_mengajar','varchar(80)'],['tanggal_sk_mengajar','date'],['jam_mengajar_per_minggu','numeric(2,0)'],['status_di_kurikulum','varchar(100)'],['nama_mata_pelajaran','varchar(80)'],['nama_mata_pelajaran_text','varchar(200)'],['mata_pelajaran_id','integer'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.dbo_kepala_sekolah = {
+  pk:null, schema:'dbo', label:'dbo.kepala_sekolah',
+  fks:{sekolah_id:'dbo.sekolah',ptk_id:'dbo.ptk',semester_id:'ref.semester'},
+  c:[['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['ptk_id','uuid',0,1],['nama','varchar(100)'],['jenis_kelamin','char(1)'],['nip','varchar(18)'],['no_hp','varchar(20)'],['email','varchar(60)'],['tmt_akhir','date'],['nomor_sk','varchar(80)'],['status_kepsek','char(9)'],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.dbo_operator_sekolah = {
+  pk:'id_instalasi', schema:'dbo', label:'dbo.operator_sekolah',
+  fks:{sekolah_id:'dbo.sekolah',pengguna_id:'auth.pengguna',ptk_id:'dbo.ptk',semester_id:'ref.semester',peran_id:'auth.peran'},
+  c:[['id_instalasi','uuid',1],['begin_sync','timestamp'],['sekolah_id','uuid',0,1],['end_sync','timestamp'],['pengguna_id','uuid',0,1],['username','varchar(60)'],['nama','varchar(100)'],['no_telepon','varchar(20)'],['no_hp','varchar(20)'],['jml_sync','integer'],['ptk_id','uuid',0,1],['semester_id','char(5)',0,1],['password','varchar(512)'],['peran_id','integer',0,1],['created_at','timestamp'],['updated_at','timestamp']]
+};
+T.dbo_tanah = { pk:'id_tanah', schema:'dbo', label:'dbo.tanah', fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id_tanah','uuid',1],['semester_id','char(5)',0,1],['sekolah_id','uuid',0,1],['jenis_prasarana','varchar(60)'],['kepemilikan_sarpras','varchar(20)'],['nama','varchar(100)'],['panjang','double precision'],['lebar','double precision'],['nilai_perolehan_aset','numeric(20,2)'],['luas','numeric(10,1)'],['luas_lahan_tersedia','numeric(10,1)'],['no_sertifikat_tanah','varchar(16)'],['njop','numeric(20,2)'],['tanah_dari_blockgrant','char(5)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.dbo_bangunan = { pk:'id_bangunan', schema:'dbo', label:'dbo.bangunan', fks:{sekolah_id:'dbo.sekolah',id_tanah:'dbo.tanah',ptk_id:'dbo.ptk',semester_id:'ref.semester'}, c:[['id_bangunan','uuid',1],['semester_id','char(5)',0,1],['sekolah_id','uuid',0,1],['id_tanah','uuid',0,1],['ptk_id','uuid',0,1],['nama_tanah','varchar(100)'],['nama_ptk','varchar(100)'],['jenis_prasarana','varchar(60)'],['kepemilikan_sarpras','varchar(20)'],['nama','varchar(100)'],['panjang','double precision'],['lebar','double precision'],['nilai_perolehan_aset','numeric(20,2)'],['jml_lantai','numeric(3,0)'],['thn_dibangun','numeric(4,0)'],['luas_tapak_bangunan','numeric(7,1)'],['kondisi','varchar(50)'],['bangunan_dari_blockgrant','char(5)'],['rusak_pondasi','numeric(6,2)'],['rusak_sloop_kolom_balok','numeric(6,2)'],['rusak_kudakuda_atap','numeric(6,2)'],['rusak_tutup_atap','numeric(6,2)'],['nilai_saat_ini','numeric(20,2)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.dbo_ruang = { pk:'id_ruang', schema:'dbo', label:'dbo.ruang', fks:{sekolah_id:'dbo.sekolah',id_tanah:'dbo.tanah',id_bangunan:'dbo.bangunan',semester_id:'ref.semester'}, c:[['id_ruang','uuid',1],['semester_id','char(5)',0,1],['sekolah_id','uuid',0,1],['id_tanah','uuid',0,1],['id_bangunan','uuid',0,1],['jenis_prasarana','varchar(60)'],['jenis_prasarana_id','integer'],['kd_ruang','varchar(10)'],['nm_ruang','varchar(100)'],['lantai','numeric(3,0)'],['panjang','double precision'],['lebar','double precision'],['kapasitas','numeric(5,0)'],['luas_ruang','double precision'],['berfungsi','char(5)'],['bobot_kerusakan','double precision'],['kondisi','varchar(50)'],['jenis_kerusakan','integer'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.dbo_alat = { pk:'id_alat', schema:'dbo', label:'dbo.alat', fks:{sekolah_id:'dbo.sekolah',id_ruang:'dbo.ruang',ptk_id:'dbo.ptk',semester_id:'ref.semester'}, c:[['id_alat','uuid',1],['semester_id','char(5)',0,1],['sekolah_id','uuid',0,1],['id_ruang','uuid',0,1],['ptk_id','uuid',0,1],['jenis_sarana','varchar(60)'],['jenis_sarana_id','integer'],['kepemilikan_sarpras','varchar(20)'],['nama','varchar(100)'],['spesifikasi','varchar(300)'],['jumlah','integer'],['status_kelaikan','varchar(10)'],['alat_dari_blockgrant','varchar(5)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.dbo_buku = { pk:'id_buku', schema:'dbo', label:'dbo.buku', fks:{sekolah_id:'dbo.sekolah',id_ruang:'dbo.ruang',semester_id:'ref.semester'}, c:[['id_buku','uuid',1],['semester_id','char(5)',0,1],['sekolah_id','uuid',0,1],['id_ruang','uuid',0,1],['nama_mata_pelajaran','varchar(80)'],['nama_ruang','varchar(100)'],['tingkat_pendidikan','varchar(20)'],['nama','varchar(256)'],['jumlah','integer'],['status_kelaikan','varchar(5)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.dbo_sanitasi = { pk:null, schema:'dbo', label:'dbo.sanitasi', fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['sumber_air','varchar(25)'],['kecukupan_air','char(6)'],['sedia_minum_siswa','varchar(5)'],['memproses_air','varchar(5)'],['siswa_bawa_air','varchar(5)'],['toilet_siswa_laki','numeric(2,0)'],['toilet_siswa_perempuan','numeric(2,0)'],['toilet_siswa_kk','numeric(2,0)'],['toilet_siswa_kecil','numeric(1,0)'],['tipe_jamban','varchar(26)'],['jamban_berfungsi','numeric(4,0)'],['jamban_rusak','numeric(4,0)'],['jamban_l','numeric(3,0)'],['jamban_p','numeric(3,0)'],['tempat_cuci_tangan','numeric(2,0)'],['tempat_cuci_tangan_rusak','integer'],['sumber_air_minum','varchar(50)'],['jamban_difabel','integer'],['sedia_pembalut','char(9)'],['sabun_air_mengalir','varchar(5)'],['pembuangan_air_limbah','varchar(5)'],['kuras_septic_tank','varchar(5)'],['ada_selokan','varchar(5)'],['tempat_sampah_kelas','varchar(5)'],['ada_tps_tertutup','varchar(5)'],['anggaran_sanitasi','varchar(5)'],['kemitraan_puskesmas','varchar(5)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.dbo_history_update = { pk:null, schema:'dbo', label:'dbo.history_update', fks:{}, c:[['progres_id','uuid'],['urut','bigint'],['time_begin','timestamp'],['time_end','timestamp'],['time_duration','varchar(12)'],['created_at','timestamp']] };
+
+// Log tables
+function makeLogAktivitas(key) {
+  return { pk:'id', schema:'log', label:key, fks:{pengguna_id:'auth.pengguna'}, c:[['id','bigint',1],['pengguna_id','uuid',0,1],['aksi','varchar(50)'],['modul','varchar(50)'],['entitas','varchar(50)'],['entitas_id','uuid'],['data_lama','jsonb'],['data_baru','jsonb'],['ip_address','varchar(45)'],['user_agent','text'],['created_at','timestamp']] };
+}
+T.log_aktivitas_pengguna = makeLogAktivitas('log.aktivitas_pengguna');
+T.log_aktivitas_pengguna_2025 = makeLogAktivitas('log.aktivitas_pengguna_2025');
+T.log_aktivitas_pengguna_2026 = makeLogAktivitas('log.aktivitas_pengguna_2026');
+T.log_aktivitas_pengguna_2027 = makeLogAktivitas('log.aktivitas_pengguna_2027');
+T.log_notifikasi = { pk:'id', schema:'log', label:'log.notifikasi', fks:{pengguna_id:'auth.pengguna',sekolah_id:'dbo.sekolah',kode_wilayah:'ref.wilayah'}, c:[['id','uuid',1],['pengguna_id','uuid',0,1],['sekolah_id','uuid',0,1],['kode_wilayah','char(8)',0,1],['judul','varchar(200)'],['isi','text'],['jenis','varchar(30)'],['dibaca_at','timestamp'],['created_at','timestamp']] };
+T.log_sinkronisasi_dapodik = { pk:'id', schema:'log', label:'log.sinkronisasi_dapodik', fks:{}, c:[['id','bigint',1],['waktu_mulai','timestamp'],['waktu_selesai','timestamp'],['durasi_detik','integer'],['tabel','varchar(50)'],['jumlah_record','integer'],['status','varchar(20)'],['pesan_error','text'],['created_at','timestamp']] };
+
+// Transaksi (hanya 2)
+T.trx_tracer_study = { pk:'id', schema:'transaksi', label:'transaksi.tracer_study', fks:{peserta_didik_id:'dbo.peserta_didik',sekolah_id:'dbo.sekolah',tahun_ajaran_id:'ref.tahun_ajaran',diinput_oleh:'auth.pengguna'}, c:[['id','uuid',1],['peserta_didik_id','uuid',0,1],['sekolah_id','uuid',0,1],['tahun_ajaran_id','numeric(4,0)',0,1],['status_serapan','varchar(30)'],['nama_institusi','varchar(200)'],['bidang','varchar(100)'],['keterangan','text'],['diinput_oleh','uuid',0,1],['verified_at','timestamp'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.trx_verifikasi_peserta_didik = { pk:'id', schema:'transaksi', label:'transaksi.verifikasi_peserta_didik', fks:{peserta_didik_id:'dbo.peserta_didik',sekolah_id:'dbo.sekolah',semester_id:'ref.semester',diverifikasi_oleh:'auth.pengguna'}, c:[['id','uuid',1],['peserta_didik_id','uuid',0,1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['jenis_masalah','varchar(30)'],['status_verifikasi','varchar(20)'],['catatan_masalah','text'],['diverifikasi_oleh','uuid',0,1],['tanggal_verifikasi','timestamp'],['catatan_verifikasi','text'],['hasil_verifikasi','varchar(20)'],['created_at','timestamp'],['updated_at','timestamp']] };
+
+// Rekap Eksternal — Data Individu
+T.rekap_akreditasi = { pk:'id', schema:'rekap', label:'rekap.akreditasi', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester',jenis_program_id:'ref.jenis_program'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['jenis_program_id','integer',0,1],['layanan_program','varchar(20)'],['status_akreditasi','varchar(20)'],['nomor_sk_akreditasi','varchar(80)'],['tanggal_sk','date'],['berlaku_sampai','date'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_akreditasi_layanan = { pk:'id', schema:'rekap', label:'rekap.akreditasi_layanan', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['layanan_program','varchar(20)'],['status_akreditasi','varchar(20)'],['nilai','numeric(5,2)'],['nomor_sk','varchar(80)'],['tanggal_sk','date'],['berlaku_sampai','date'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_ats = { pk:'id', schema:'rekap', label:'rekap.ats', isAgg:false, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['kategori_ats','varchar(30)'],['kelompok_usia','varchar(20)'],['jenis_kelamin','char(1)'],['jumlah','integer'],['faktor_penyebab','varchar(100)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_bantuan_bop = { pk:'id', schema:'rekap', label:'rekap.bantuan_bop', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['jenis_bantuan','varchar(50)'],['nominal','numeric(15,2)'],['tanggal_pencairan','date'],['status','varchar(20)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_bantuan_revitalisasi = { pk:'id', schema:'rekap', label:'rekap.bantuan_revitalisasi', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['tahun_anggaran','numeric(4,0)'],['nominal','numeric(15,2)'],['tanggal_pencairan','date'],['status','varchar(20)'],['komponen','varchar(100)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_hasil_tka = { pk:'id', schema:'rekap', label:'rekap.hasil_tka', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['mata_pelajaran','varchar(80)'],['jumlah_peserta','integer'],['nilai_rata_rata','numeric(5,2)'],['nilai_tertinggi','numeric(5,2)'],['nilai_terendah','numeric(5,2)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_tka_mapel = { pk:'id', schema:'rekap', label:'rekap.tka_mapel', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['kode_mapel','varchar(10)'],['mata_pelajaran','varchar(80)'],['jumlah_peserta','integer'],['nilai_rata_rata','numeric(5,2)'],['nilai_tertinggi','numeric(5,2)'],['nilai_terendah','numeric(5,2)'],['nilai_standar','numeric(5,2)'],['persentase_di_atas_standar','numeric(5,2)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_pemberdayaan_perempuan = { pk:'id', schema:'rekap', label:'rekap.pemberdayaan_perempuan', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['jenis_program','varchar(100)'],['jumlah_peserta','integer'],['jumlah_peserta_perempuan','integer'],['outcome_ekonomi','varchar(100)'],['keterangan','text'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_pendidikan_keaksaraan = { pk:'id', schema:'rekap', label:'rekap.pendidikan_keaksaraan', isAgg:false, fks:{sekolah_id:'dbo.sekolah',peserta_didik_id:'dbo.peserta_didik',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['peserta_didik_id','uuid',0,1],['semester_id','char(5)',0,1],['jenis_keaksaraan','varchar(30)'],['nomor_sukma','varchar(50)'],['tanggal_sukma','date'],['status_sukma','varchar(20)'],['status','varchar(20)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_sekolah_rumah = { pk:'id', schema:'rekap', label:'rekap.sekolah_rumah', isAgg:false, fks:{sekolah_id:'dbo.sekolah',sekolah_afiliasi_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['sekolah_afiliasi_id','uuid',0,1],['semester_id','char(5)',0,1],['jumlah_peserta','integer'],['status_afiliasi','varchar(20)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_peserta_lulus_paket_c = { pk:'id', schema:'rekap', label:'rekap.peserta_lulus_paket_c', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['tahun_lulus','numeric(4,0)'],['jumlah_lulusan','integer'],['jumlah_laki','integer'],['jumlah_perempuan','integer'],['jumlah_melanjutkan_pt','integer'],['jumlah_bekerja','integer'],['jumlah_wirausaha','integer'],['jumlah_belum_terlapor','integer'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_e_ijazah = { pk:'id', schema:'rekap', label:'rekap.e_ijazah', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['jenis_paket','varchar(10)'],['jumlah_peserta','integer'],['jumlah_terbit_ijazah','integer'],['jumlah_belum_terbit','integer'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_peserta_nin = { pk:'id', schema:'rekap', label:'rekap.peserta_nin', isAgg:false, fks:{sekolah_id:'dbo.sekolah',semester_id:'ref.semester'}, c:[['id','uuid',1],['sekolah_id','uuid',0,1],['semester_id','char(5)',0,1],['tahun_ajaran','varchar(9)'],['jumlah_peserta','integer'],['jenis_masalah','varchar(50)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+
+// Rekap — Tabel Agregasi Dashboard (KAK PNFI 2026)
+T.rekap_rekap_satuan_pnfi = { pk:'id', schema:'rekap', label:'rekap.rekap_satuan_pnfi', isAgg:true, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['jenis_lembaga','varchar(50)'],['jumlah_aktif','integer'],['jumlah_nonaktif','integer'],['jumlah_total','integer'],['persentase_akreditasi','numeric(5,2)'],['persentase_update_dapodik','numeric(5,2)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_rekap_peserta_didik = { pk:'id', schema:'rekap', label:'rekap.rekap_peserta_didik', isAgg:true, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['jenis_lembaga','varchar(50)'],['program_paket','varchar(10)'],['jenis_kelamin','char(1)'],['jumlah','integer'],['jumlah_wilayah_3t','integer'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_rekap_tutor = { pk:'id', schema:'rekap', label:'rekap.rekap_tutor', isAgg:true, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['kualifikasi_pendidikan','varchar(50)'],['status_sertifikasi','varchar(30)'],['status_kepegawaian','varchar(30)'],['jumlah','integer'],['rasio_tutor_peserta','numeric(8,2)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_rekap_ats = { pk:'id', schema:'rekap', label:'rekap.rekap_ats', isAgg:true, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['kategori_ats','varchar(30)'],['kelompok_usia','varchar(20)'],['jumlah','integer'],['jumlah_laki','integer'],['jumlah_perempuan','integer'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_rekap_akreditasi = { pk:'id', schema:'rekap', label:'rekap.rekap_akreditasi', isAgg:true, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['layanan_program','varchar(20)'],['status_akreditasi','varchar(20)'],['jumlah','integer'],['persentase','numeric(5,2)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_rekap_tka = { pk:'id', schema:'rekap', label:'rekap.rekap_tka', isAgg:true, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['kode_mapel','varchar(10)'],['mata_pelajaran','varchar(80)'],['jumlah_sekolah','integer'],['jumlah_peserta','integer'],['nilai_rata_rata','numeric(5,2)'],['nilai_tertinggi','numeric(5,2)'],['nilai_terendah','numeric(5,2)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_rekap_keaksaraan = { pk:'id', schema:'rekap', label:'rekap.rekap_keaksaraan', isAgg:true, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['jenis_keaksaraan','varchar(30)'],['jumlah_peserta','integer'],['jumlah_laki','integer'],['jumlah_perempuan','integer'],['jumlah_sudah_sukma','integer'],['persentase_sukma','numeric(5,2)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+T.rekap_rekap_perempuan = { pk:'id', schema:'rekap', label:'rekap.rekap_perempuan', isAgg:true, fks:{kode_wilayah:'ref.wilayah',semester_id:'ref.semester'}, c:[['id','uuid',1],['kode_wilayah','char(8)',0,1],['semester_id','char(5)',0,1],['jenis_program','varchar(100)'],['jumlah_peserta','integer'],['jumlah_laki','integer'],['jumlah_perempuan','integer'],['outcome_ekonomi','varchar(100)'],['sumber_data','varchar(50)'],['created_at','timestamp'],['updated_at','timestamp']] };
+
+// =============================================
+// SCHEMA META
+// =============================================
+var SM = {
+  auth:     {label:'Autentikasi',    color:'#1a6fc4', bg:'#e8f0fa', icon:'fa-shield-halved',       desc:'Mengelola pengguna, peran, dan token akses SSO untuk keamanan sistem.'},
+  ref:      {label:'Referensi',      color:'#0d7c5f', bg:'#e6f5ef', icon:'fa-book',                desc:'Data master referensi: wilayah, bentuk pendidikan, semester, dan tahun ajaran.'},
+  dbo:      {label:'Master Data',    color:'#b85c00', bg:'#fdf2e3', icon:'fa-database',             desc:'Data inti Dapodik: sekolah, peserta didik, PTK, sarana prasarana, dan pembelajaran.'},
+  log:      {label:'Logging',        color:'#7c3aed', bg:'#f0ebfa', icon:'fa-clock-rotate-left',     desc:'Mencatat aktivitas pengguna, notifikasi, dan proses sinkronisasi dengan Dapodik.'},
+  transaksi:{label:'Transaksi',      color:'#c41e1e', bg:'#fceaea', icon:'fa-right-left',            desc:'Data transaksional yang diinput langsung di aplikasi PNFI: tracer study lulusan dan verifikasi peserta didik.'},
+  rekap:    {label:'Rekap Eksternal',color:'#0e7490', bg:'#e6f5fa', icon:'fa-arrow-down-to-line',    desc:'Data hasil rekap dari aplikasi lain dan tabel agregasi untuk dashboard PNFI 2026.'}
+};
+
+// =============================================
+// HITUNG TOTAL
+// =============================================
+var totalTbl = 0, totalCol = 0, totalFk = 0;
+var keys = Object.keys(T);
+for (var i = 0; i < keys.length; i++) {
+  var t = T[keys[i]];
+  totalTbl++;
+  totalCol += t.c.length;
+  var fkKeys = Object.keys(t.fks);
+  totalFk += fkKeys.length;
+}
+
+// =============================================
+// FUNGSI HELPER
+// =============================================
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderRows(cols) {
+  var h = '';
+  for (var i = 0; i < cols.length; i++) {
+    var c = cols[i];
+    var b = '';
+    if (c[2] === 1) b += '<span class="ab">PK</span>';
+    if (c[3] === 1) b += '<span class="af">FK</span>';
+    h += '<tr><td><span class="cn">' + esc(c[0]) + '</span>' + b + '</td><td><span class="ct">' + esc(c[1]) + '</span></td></tr>';
+  }
+  return h;
+}
+
+function getTablesBySchema(schemaKey) {
+  var arr = [];
+  for (var k in T) { if (T[k].schema === schemaKey) arr.push(T[k]); }
+  return arr;
+}
+
+// =============================================
+// BUILD SLIDES
+// =============================================
+var slides = [];
+var cur = 0;
+var gStart = {};
+
+// 0: Cover
+slides.push({
+  g:'cover',
+  h:'<div class="cc"><div class="cdeco"></div><div class="cb">Database Architecture</div><h1 class="ct">Desain Database<br><b>Pendidikan Nonformal</b></h1><p class="cs">Sistem Informasi PNFI &mdash; Struktur, Relasi, dan Klasifikasi Tabel</p><div class="cm"><span><i class="fas fa-shield-halved" style="color:#1a6fc4"></i> Auth</span><span><i class="fas fa-book" style="color:#0d7c5f"></i> Referensi</span><span><i class="fas fa-database" style="color:#b85c00"></i> Master</span><span><i class="fas fa-clock-rotate-left" style="color:#7c3aed"></i> Log</span><span><i class="fas fa-right-left" style="color:#c41e1e"></i> Transaksi</span><span><i class="fas fa-arrow-down-to-line" style="color:#0e7490"></i> Rekap</span></div></div>'
+});
+
+// 1: Overview
+var ovCards = '';
+var skKeys = ['auth','ref','dbo','log','transaksi','rekap'];
+for (var si = 0; si < skKeys.length; si++) {
+  var sk = skKeys[si], sm = SM[sk], tbls = getTablesBySchema(sk);
+  ovCards += '<div class="sk" onclick="goG(\'' + sk + '\')"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:' + sm.color + '"></div><div class="si" style="background:' + sm.bg + ';color:' + sm.color + '"><i class="fas ' + sm.icon + '"></i></div><div class="sn" style="color:' + sm.color + '">' + sm.label + '</div><div class="sd">' + sm.desc + '</div><div class="sv" style="color:' + sm.color + '">' + tbls.length + ' <small>tabel</small></div></div>';
+}
+slides.push({
+  g:'overview',
+  h:'<div style="margin-bottom:6px;font-family:JetBrains Mono,monospace;font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase">Arsitektur Database</div><h2 style="font-size:28px;font-weight:700;margin-bottom:3px">Ringkasan Skema</h2><p style="color:var(--muted);font-size:13px;margin-bottom:16px">Klik kartu untuk navigasi ke kelompok tabel terkait</p><div class="og">' + ovCards + '</div><div class="sr"><div class="st"><div class="stv">' + totalTbl + '</div><div class="stl">Total Tabel</div></div><div class="st"><div class="stv">' + totalCol + '</div><div class="stl">Total Kolom</div></div><div class="st"><div class="stv">' + totalFk + '</div><div class="stl">Foreign Key</div></div><div class="st"><div class="stv">6</div><div class="stl">Skema</div></div><div class="st"><div class="stv">2</div><div class="stl">Transaksi Aktif</div></div></div>'
+});
+
+// Per skema: header + detail per tabel
+for (var si2 = 0; si2 < skKeys.length; si2++) {
+  var sk2 = skKeys[si2], sm2 = SM[sk2];
+  gStart[sk2] = slides.length;
+  var tbls2 = getTablesBySchema(sk2);
+
+  // Chip list
+  var chips = '';
+  for (var ci = 0; ci < tbls2.length; ci++) {
+    var tb = tbls2[ci];
+    var isA = tb.isAgg === true;
+    if (isA) {
+      chips += '<span class="tc" style="color:#fff;background:' + sm2.color + ';border-color:' + sm2.color + '">' + esc(tb.label) + '</span>';
+    } else {
+      chips += '<span class="tc" style="color:' + sm2.color + ';border-color:' + sm2.color + '30;background:' + sm2.bg + '">' + esc(tb.label) + '</span>';
+    }
+  }
+
+  // Note
+  var note = '';
+  if (sk2 === 'transaksi') {
+    note = '<div class="ggn" style="color:var(--trx);background:var(--trx-bg);border-color:rgba(196,30,30,.2)"><i class="fas fa-pen-to-square"></i>Hanya tabel yang memiliki form input langsung di aplikasi PNFI</div>';
+  }
+  if (sk2 === 'rekap') {
+    note = '<div class="ggn" style="color:var(--rekap);background:var(--rekap-bg);border-color:rgba(14,116,144,.2)"><i class="fas fa-circle-info"></i>Data individu diterima dari aplikasi lain; chip biru = tabel agregasi dashboard KAK PNFI 2026</div>';
+  }
+
+  slides.push({
+    g: sk2,
+    h: '<div class="gh"><div class="ggb" style="color:' + sm2.color + '"><i class="fas ' + sm2.icon + '" style="margin-right:8px"></i>' + sk2 + '</div><h2 class="ggt" style="color:' + sm2.color + '">' + sm2.label + '</h2><p class="ggd">' + sm2.desc + '</p>' + note + '<div class="ggtc">' + chips + '</div></div>'
+  });
+
+  // Detail per tabel
+  for (var ti = 0; ti < tbls2.length; ti++) {
+    var tb2 = tbls2[ti];
+    var cc = tb2.c.length;
+    var fc = Object.keys(tb2.fks).length;
+    var isA2 = tb2.isAgg === true;
+    var aggBadge = isA2 ? '<span class="agbadge" style="background:' + sm2.color + '">AGREGASI</span>' : '';
+    var pkLine = tb2.pk ? ' &middot; Primary Key: <span style="color:var(--accent)">' + esc(tb2.pk) + '</span>' : ' &middot; <span style="color:var(--muted)">Tanpa PK (composite key)</span>';
+    var fkLine = fc > 0 ? ' &middot; ' + fc + ' FK' : '';
+
+    slides.push({
+      g: sk2,
+      h: '<div class="tdh"><div class="tdd" style="background:' + sm2.color + '"></div><span class="tdn">' + esc(tb2.label) + '</span>' + aggBadge + '<span class="tdc">' + cc + ' kolom' + fkLine + '</span></div><div class="tds">' + sk2 + pkLine + '</div><table class="ctb"><thead><tr><th style="width:45%">Nama Kolom</th><th>Tipe Data</th></tr></thead><tbody>' + renderRows(tb2.c) + '</tbody></table>'
+    });
+  }
+}
+
+// Relasi slide
+var fkMap = {};
+for (var fk in T) {
+  var ft = T[fk];
+  for (var fkr in ft.fks) {
+    if (!fkMap[ft.fks[fkr]]) fkMap[ft.fks[fkr]] = [];
+    fkMap[ft.fks[fkr]].push({from: ft.label, col: fkr});
+  }
+}
+var relCards = '';
+var rki = 0;
+for (var rkt in fkMap) {
+  if (rki >= 24) break;
+  var rkes = fkMap[rkt];
+  var rlines = '';
+  for (var rli = 0; rli < rkes.length; rli++) {
+    rlines += '<span style="color:var(--fg)">' + esc(rkes[rli].from) + '</span>.' + esc(rkes[rli].col) + '<br>';
+  }
+  relCards += '<div class="rc"><div class="rn"><i class="fas fa-arrow-right" style="margin-right:4px"></i>' + esc(rkt) + '</div><div class="rb">' + rlines + '<span style="color:var(--muted);font-size:10px">' + rkes.length + ' referensi</span></div></div>';
+  rki++;
+}
+var fkTotal = 0;
+for (var fkt in fkMap) fkTotal += fkMap[fkt].length;
+var relExtra = fkTotal > 24 ? '<div style="text-align:center;margin-top:10px;color:var(--muted);font-size:12px">dan ' + (fkTotal - 24) + ' relasi lainnya...</div>' : '';
+slides.push({g:'relations', h:'<div style="margin-bottom:6px;font-family:JetBrains Mono,monospace;font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase">Foreign Key Map</div><h2 style="font-size:28px;font-weight:700;margin-bottom:4px">Peta Relasi Antar Tabel</h2><p style="color:var(--muted);font-size:13px;margin-bottom:14px">Tabel yang menjadi rujukan foreign key (' + fkTotal + ' total relasi)</p><div class="rg">' + relCards + '</div>' + relExtra});
+
+// Penutup
+slides.push({g:'end', h:'<div class="cc"><div class="cdeco"></div><div class="cb">End of Presentation</div><h1 class="ct" style="font-size:40px">Desain Database <b>PNFI</b></h1><p class="cs">6 Skema &middot; ' + totalTbl + ' Tabel &middot; ' + totalCol + ' Kolom &middot; ' + fkTotal + ' Foreign Key</p><div class="cm"><span><i class="fas fa-shield-halved" style="color:#1a6fc4"></i> Auth</span><span><i class="fas fa-book" style="color:#0d7c5f"></i> Referensi</span><span><i class="fas fa-database" style="color:#b85c00"></i> Master</span><span><i class="fas fa-clock-rotate-left" style="color:#7c3aed"></i> Log</span><span><i class="fas fa-right-left" style="color:#c41e1e"></i> Transaksi</span><span><i class="fas fa-arrow-down-to-line" style="color:#0e7490"></i> Rekap</span></div></div>'});
+
+// =============================================
+// RENDER & NAVIGASI
+// =============================================
+var pr = document.getElementById('pr');
+for (var ri2 = 0; ri2 < slides.length; ri2++) {
+  var div = document.createElement('div');
+  div.className = 'slide' + (ri2 === 0 ? ' on' : '');
+  div.innerHTML = slides[ri2].h;
+  pr.appendChild(div);
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length || idx === cur) return;
+  var old = pr.children[cur];
+  var nw = pr.children[idx];
+  old.className = idx > cur ? 'slide off' : 'slide';
+  nw.className = 'slide on';
+  nw.scrollTop = 0;
+  cur = idx;
+  updUI();
+}
+function updUI() {
+  document.getElementById('sct').textContent = (cur + 1) + '/' + slides.length;
+  document.getElementById('pb').style.width = ((cur + 1) / slides.length * 100) + '%';
+  document.getElementById('bp').disabled = cur === 0;
+  document.getElementById('bf').disabled = cur === 0;
+  document.getElementById('bn').disabled = cur === slides.length - 1;
+  document.getElementById('bl').disabled = cur === slides.length - 1;
+  var dots = document.querySelectorAll('.gd');
+  for (var di = 0; di < dots.length; di++) {
+    dots[di].classList.toggle('on', dots[di].dataset.g === slides[cur].g);
+  }
+}
+function goG(gk) { if (gStart[gk] !== undefined) goTo(gStart[gk]); }
+
+document.getElementById('bp').onclick = function() { goTo(cur - 1); };
+document.getElementById('bn').onclick = function() { goTo(cur + 1); };
+document.getElementById('bf').onclick = function() { goTo(0); };
+document.getElementById('bl').onclick = function() { goTo(slides.length - 1); };
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goTo(cur + 1); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(cur - 1); }
+  if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+
+var tsx = 0;
+document.addEventListener('touchstart', function(e) { tsx = e.touches[0].clientX; });
+document.addEventListener('touchend', function(e) { var d = tsx - e.changedTouches[0].clientX; if (Math.abs(d) > 60) { d > 0 ? goTo(cur + 1) : goTo(cur - 1); }});
+
+// Group dots
+var gColors = {cover:'#c2550a',overview:'#c2550a',auth:'#1a6fc4',ref:'#0d7c5f',dbo:'#b85c00',log:'#7c3aed',transaksi:'#c41e1e',rekap:'#0e7490',relations:'#c2550a',end:'#c2550a'};
+var gLabels = {cover:'Cover',overview:'Overview',auth:'Auth',ref:'Referensi',dbo:'Master Data',log:'Logging',transaksi:'Transaksi',rekap:'Rekap Eksternal',relations:'Relasi',end:'Penutup'};
+var gnv = document.getElementById('gnv');
+for (var gk in gColors) {
+  var dot = document.createElement('div');
+  dot.className = 'gd' + (slides[0].g === gk ? ' on' : '');
+  dot.dataset.g = gk;
+  dot.style.background = gColors[gk];
+  dot.innerHTML = '<span class="tt">' + gLabels[gk] + '</span>';
+  dot.onclick = (function(g) { return function() { for (var fi = 0; fi < slides.length; fi++) { if (slides[fi].g === g) { goTo(fi); break; } }}; })(gk);
+  gnv.appendChild(dot);
+}
+
+// Particles
+var cv = document.getElementById('cv');
+var cx = cv.getContext('2d');
+var pts = [];
+function rsz() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+rsz();
+window.addEventListener('resize', rsz);
+for (var pi = 0; pi < 25; pi++) {
+  pts.push({x:Math.random()*cv.width, y:Math.random()*cv.height, vx:(Math.random()-.5)*.2, vy:(Math.random()-.5)*.2, r:Math.random()*1.5+.5, a:Math.random()*.3+.1});
+}
+function anim() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  for (var i = 0; i < pts.length; i++) {
+    var p = pts[i];
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = cv.width; if (p.x > cv.width) p.x = 0;
+    if (p.y < 0) p.y = cv.height; if (p.y > cv.height) p.y = 0;
+    cx.beginPath();
+    cx.arc(p.x, p.y, Math.max(0.5, p.r), 0, Math.PI * 2);
+    cx.fillStyle = 'rgba(194,85,10,' + p.a + ')';
+    cx.fill();
+  }
+  for (var i2 = 0; i2 < pts.length; i2++) {
+    for (var j = i2 + 1; j < pts.length; j++) {
+      var dx = pts[i2].x - pts[j].x, dy = pts[i2].y - pts[j].y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100) {
+        cx.beginPath();
+        cx.moveTo(pts[i2].x, pts[i2].y);
+        cx.lineTo(pts[j].x, pts[j].y);
+        cx.strokeStyle = 'rgba(194,85,10,' + (0.05 * (1 - dist / 100)) + ')';
+        cx.lineWidth = 0.5;
+        cx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(anim);
+}
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) anim();
+
+updUI();
+</script>
+</body>
+</html>
